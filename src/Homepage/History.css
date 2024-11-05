@@ -1,0 +1,68 @@
+.history-page {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.error-message {
+  color: red;
+  margin-bottom: 20px;
+}
+
+.trip-cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.trip-card {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  transition: transform 0.2s;
+}
+
+.trip-card:hover {
+  transform: scale(1.02);
+}
+
+.trip-card h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.trip-card p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.status-active {
+  color: green;
+  font-weight: bold;
+}
+
+.status-completed {
+  color: red;
+  font-weight: bold;
+}
+
+.trip-card a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.trip-card a:hover {
+  text-decoration: underline;
+}
+
+.trip-card ul {
+  list-style-type: none;
+  padding-left: 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.trip-card li {
+  margin: 4px 0;
+}

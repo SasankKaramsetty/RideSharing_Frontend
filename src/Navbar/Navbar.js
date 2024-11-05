@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faHistory } from '@fortawesome/free-solid-svg-icons';
+import { faHistory } from '@fortawesome/free-solid-svg-icons';
 import "./nav.css"
 const NavBar = () => {
   return (
@@ -12,9 +12,6 @@ const NavBar = () => {
       <div>
       <NavLink to="/history" activeClassName="active-link">
           <FontAwesomeIcon icon={faHistory} /> 
-        </NavLink>
-        <NavLink to="/profile" activeClassName="active-link">
-          <FontAwesomeIcon icon={faUser} /> 
         </NavLink>
       </div>
     </nav>

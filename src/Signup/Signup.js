@@ -8,24 +8,31 @@ const Signup = ({ onSignup }) => {
     username: '',
     password: '',
     confirmPassword: '',
-    role: 'Traveler',
+    isTraveler: true,
   });
   const [error, setError] = useState('');
 
   const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-    setError(''); // Clear error when user types
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+    setError(''); 
   };
 
-  const handleSignUp = (e) => {
+  const handleRoleChange = (e) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      isTraveler: e.target.value === 'true',
+    }));
+  };
+
+  const handleSignUp = async (e) => {
     e.preventDefault();
 
-    const { username, password, confirmPassword, role } = formData;
+    const { username, password, confirmPassword } = formData;
 
-    // Simple validation
     if (!username || !password || !confirmPassword) {
       setError('All fields are required');
       return;
@@ -36,12 +43,30 @@ const Signup = ({ onSignup }) => {
       return;
     }
 
-    // Mock registration success
-    alert(`User registered as ${role}`);
-    
-    // Call onSignup to set user in App and redirect to home page
-    onSignup({ username, role });
-    navigate('/');
+    try {
+      const response = await fetch('http://localhost:8081/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username,
+          password,
+          role: formData.isTraveler ? 'Traveler' : 'Admin',
+        }),
+      });
+
+      if (response.ok) {
+        alert('Account created successfully!');
+        onSignup({ username, role: formData.isTraveler ? 'Traveler' : 'Admin' });
+        navigate('/login');
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || 'Signup failed');
+      }
+    } catch (error) {
+      setError('Signup failed. Please try again.');
+    }
   };
 
   return (
@@ -51,7 +76,7 @@ const Signup = ({ onSignup }) => {
 
         <h3 className="signupTitle">Sign Up</h3>
 
-        {error && <p className="error">{error}</p>} {/* Error message */}
+        {error && <p className="error">{error}</p>} 
 
         <div className="mb-3">
           <label htmlFor="username">Username</label>
@@ -93,17 +118,29 @@ const Signup = ({ onSignup }) => {
         </div>
 
         <div className="mb-3">
-          <label htmlFor="role">Role</label>
-          <select
-            id="role"
-            className="input"
-            name="role"
-            value={formData.role}
-            onChange={handleInputChange}
-          >
-            <option value="Traveler">Traveler</option>
-            <option value="Admin">Admin</option>
-          </select>
+          <label>User Role:</label>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="isTraveler"
+                value="true"
+                checked={formData.isTraveler}
+                onChange={handleRoleChange}
+              />
+              Traveler
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="isTraveler"
+                value="false"
+                checked={!formData.isTraveler}
+                onChange={handleRoleChange}
+              />
+              Admin
+            </label>
+          </div>
         </div>
 
         <div className="d-grid">

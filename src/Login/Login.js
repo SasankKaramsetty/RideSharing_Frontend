@@ -1,21 +1,24 @@
 import React, { useState } from 'react';
 import './Login.css';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Login = ({ onLogin }) => {
     const [formData, setFormData] = useState({
         username: '',
         password: '',
+        isTraveler: true, 
     });
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
     const handleInputChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-        setError(''); // Clear error message as user types
+        const { name, value, type, checked } = e.target;
+        setFormData((prevData) => ({
+            ...prevData,
+            [name]: type === 'checkbox' ? checked : value,
+        }));
+        setError(''); 
     };
 
     const validateForm = () => {
@@ -40,7 +43,7 @@ const Login = ({ onLogin }) => {
         return '';
     };
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
 
         const errorMsg = validateForm();
@@ -49,11 +52,36 @@ const Login = ({ onLogin }) => {
             return;
         }
 
-        // Mock login response for frontend testing
-        const mockUser = { username: formData.username, role: 'Traveler' };
-        localStorage.setItem('user', JSON.stringify(mockUser));
-        onLogin(mockUser);
-        navigate('/'); // Redirect to home after successful login
+        try {
+            console.log("Sending login request...");
+
+            const response = await axios.post('http://localhost:8081/api/auth/login', {
+                username: formData.username,
+                password: formData.password,
+                isTraveler: formData.isTraveler,
+            });
+
+            console.log("Login successful, full response:", response);
+            
+            const token = response.data; 
+            if (!token) {
+                console.error("Token not found in response. Check server response format.");
+                setError("Login failed. Please check your username and password.");
+                return;
+            }
+
+            console.log("Login successful, received token:", token);
+            
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify({ username: formData.username, role: formData.isTraveler ? 'Traveler' : 'Admin' }));
+            console.log("Token and user role saved in localStorage.");
+
+            onLogin({ username: formData.username, role: formData.isTraveler ? 'Traveler' : 'Admin' });
+            navigate('/');
+        } catch (err) {
+            console.error("Error during login:", err);
+            setError('Invalid username or password');
+        }
     };
 
     return (
@@ -62,13 +90,13 @@ const Login = ({ onLogin }) => {
                 <h1 className="appTitle">RideShare</h1>
                 <h3 className="appTitle">Login</h3>
 
-                {error && <p className="error">{error}</p>} {/* Display error message */}
+                {error && <p className="error">{error}</p>} 
 
                 <div className="mb-3">
                     <label htmlFor="username">Username</label>
                     <input
                         type="text"
-                        className="input" // Use your custom input class
+                        className="input"
                         placeholder="Enter username"
                         name="username"
                         id="username"
@@ -81,7 +109,7 @@ const Login = ({ onLogin }) => {
                     <label htmlFor="password">Password</label>
                     <input
                         type="password"
-                        className="input" // Use your custom input class
+                        className="input"
                         placeholder="Enter password"
                         name="password"
                         id="password"
@@ -90,13 +118,39 @@ const Login = ({ onLogin }) => {
                     />
                 </div>
 
+                <div className="mb-3">
+                    <label>User Role:</label>
+                    <div>
+                        <label>
+                            <input
+                                type="radio"
+                                name="isTraveler"
+                                value="true"
+                                checked={formData.isTraveler}
+                                onChange={() => setFormData({ ...formData, isTraveler: true })}
+                            />
+                            Traveler
+                        </label>
+                        <label>
+                            <input
+                                type="radio"
+                                name="isTraveler"
+                                value="false"
+                                checked={!formData.isTraveler}
+                                onChange={() => setFormData({ ...formData, isTraveler: false })}
+                            />
+                            Admin
+                        </label>
+                    </div>
+                </div>
+
                 <div className="d-grid buttonContainer">
                     <button type="submit" className="btn btn-primary button">
                         Login
                     </button>
                 </div>
-                <p className="forgotPassword text-right"> {/* Updated class name */}
-                    Not a user? Create one <a className="forgotPasswordLink" href="/signup">sign up?</a> {/* Added link styling */}
+                <p className="forgotPassword text-right">
+                    Not a user? Create one <a className="forgotPasswordLink" href="/signup">sign up?</a>
                 </p>
             </form>
         </div>
